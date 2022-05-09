@@ -20,6 +20,11 @@ body {
   background: red;
 }
 
+.input {
+  width: 80vw;
+  height: 30vh;
+}
+
 .keyBoard {
   font-size: 2rem;
   background-color: grey;
@@ -32,4 +37,8 @@ body {
     justify-content: space-between;
     gap: 5px;
   }
+}
+
+.keyBoardLang {
+  font-size: 32px;
 }

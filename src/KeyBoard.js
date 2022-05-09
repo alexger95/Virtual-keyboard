@@ -1,13 +1,16 @@
-import {getEnglishLayout, getRussianLayout} from './Language'
+import {getEnglishLayout, getRussianLayout, getKeyCode} from './Language'
 
 export default class KeyBoard {
-  constructor(language = 'en', outputArea, keyBoardArea) { 
+  constructor(language = 'en', outputArea, keyBoardArea, keyBoardLang) { 
     this.language = language;
     this.currentSkin = {};
     this.loadSkin(this.language);
+    this.keyCode = getKeyCode().default;
+    this.shift = false;
     this.shift = false;
     this.outputArea = outputArea;
     this.keyBoardArea = keyBoardArea;
+    this.keyBoardLang = keyBoardLang;
     this.cursor = 0;
   }
 
@@ -17,6 +20,7 @@ export default class KeyBoard {
     } else {
       this.currentSkin = getRussianLayout();
     }
+    console.log( this.keyBoardLang )
   }
 
   render() { 
@@ -26,87 +30,83 @@ export default class KeyBoard {
     })
     this.keyHandler();
   }
-
+///////////////////KEY////////////////////////////////
   keyHandler() {
-    document.addEventListener('keydown', (event) => this.keyDown(event))
-    document.addEventListener('keyup', (event) => this.keyUp(event))
+    document.addEventListener('keydown', (event) => this.keyDown(event));
+    document.addEventListener('keyup', (event) => this.keyUp(event));
   }
 
   keyDown(event) {
+    console.log('keydown')
     event.preventDefault();
-    event.code === 16 && this.shiftWatcher(true)
-    console.log('event key: ' + event.key + 'hash' + this.hashName(event.key))
-    let key = document.querySelector(`[data-hash-name="${this.hashName(event.key)}"]`);
-    this.buttonPressed(key, true)
-    // this.inputSymbol(event.key, this.outputArea)
+    let keyNode = document.querySelector(`[data-code-name="${event.code}"]`);
+    this.keyPressed(keyNode, true);
+    
+    if(this.shiftWatcher(event, true) && this.altWatcher(event, true)) {
+      this.inputSymbol(keyNode.innerHTML);
+    } 
+    
   }
 
   keyUp(event) {
     event.preventDefault();
-    event.code === 16 && this.shiftWatcher(false)
-    let key = document.querySelector(`[data-hash-name="${this.hashName(event.key)}"]`);
-    console.log(key)
-    this.buttonPressed(key, false)
-  }
-
-  filter(event) {
-    switch(event.code) {
-      case 'Backspace': 
-        this.outputArea = this.outputArea.value.slice(0,-1);
-        break
+    this.shiftWatcher(event, false);
     
-      case 'NumpadDecimal':  
-        this.outputArea = this.outputArea.value.slice(0,-1);
-        break
-    
-      default:
-        this.outputArea = this.outputArea.value.slice(0,-1);
-        break
-    }
+    let keyNode = document.querySelector(`[data-code-name="${event.code}"]`);
+    this.keyPressed(keyNode, false)
   }
 
-  inputSymbol(unicode, inputNode = this.outputArea) {
-    inputNode.append(unicode)
-  }
-
-  shiftWatcher(state) {
-    if (state) {
-      this.shift = true;
+  keyPressed(keyNode, addStyle) {
+    if(addStyle) {
+      keyNode.classList.add('pressed');
+      // if (this.filter(event)) {
+      //   this.inputSymbol(event.target.key.innerText);
+      // }
     } else {
-      this.shift = false;
+      keyNode.classList.remove('pressed');
     }
-    this.render()
   }
+////////////////////////////button////////////////////////////////////////////////////////////
 
   clickHandler(event) {
-    event.type === 'mousedown'?this.buttonPressed(event.target, true):this.buttonPressed(event.target, false)  
+    if(event.type === 'mousedown') {
+      this.buttonPressed(event, true)
+      // event.target.removeEventListener('mousedown')
+    } else {
+      this.buttonPressed(event, false)
+      // event.target.addEventListener('mousedown', (event) => this.clickHandler(event))
+    }
+    
   }
 
-  buttonPressed(key, addStyle) {
+  buttonPressed(event, addStyle) {
     if(addStyle) {
-      key.classList.add('pressed');
-      this.inputSymbol(key.innerText);
+      event.target.key.classList.add('pressed');
+      if (this.filter(event)) {
+        this.inputSymbol(event.target.key.innerText);
+      }
     } else {
-      key.classList.remove('pressed');
+      event.target.key.classList.remove('pressed');
     }
   }
-
-  keyFactory(keyUnicode = '?') {
+/////////////////////////////////////////////////////////////////
+  keyFactory(keyUnicode = '?', keysCode, keyIndex) {  
     let keyNode = document.createElement('div');
-    keyNode.classList.add(keyUnicode, 'key');
-    keyNode.dataset.hashName = this.hashName(keyUnicode);
+    keyNode.classList.add('key');
+    keyNode.dataset.codeName = keysCode[keyIndex];
     keyNode.innerText = keyUnicode;
     keyNode.addEventListener('mousedown', (event) => this.clickHandler(event))
     keyNode.addEventListener('mouseup', (event) => this.clickHandler(event))
     return keyNode;
   }
 
-  rowFactory(layoutString = []) {
+  rowFactory(layoutString = [], rowIndex) {
     let keysArray = layoutString.split(' ');
+    let keysCode = this.keyCode[rowIndex].split(' ');
     let rowBlock = document.createElement('div');
     rowBlock.classList.add('rowBlock');
-    keysArray = keysArray.map((element) => {
-      return this.keyFactory(element)
+    keysArray = keysArray.map((key, keyIndex) => {
+      return this.keyFactory(key, keysCode, keyIndex)
     });
     rowBlock.append(...keysArray);
     return rowBlock;
@@ -119,17 +119,92 @@ export default class KeyBoard {
     } else {
       keyBoardAllNodes = this.currentSkin.default;
     }
-    keyBoardAllNodes = keyBoardAllNodes.map((row) => {
-      return this.rowFactory(row);
+    keyBoardAllNodes = keyBoardAllNodes.map((row, rowIndex) => {  
+      return this.rowFactory(row, rowIndex);
     });
     return keyBoardAllNodes;
   }
 
-  hashName(string) {
-      let result = 0;
-      for (let i = 0; i < string.length; i++) {
-          result += string.charCodeAt(i);
-      }
-      return result;
+/////////////////////////////////////////////////////////////
+  inputSymbol(unicode, inputNode = this.outputArea) {
+    inputNode.append(unicode)
   }
+
+
+
+  filter(event) {
+    if(event.code === 'ShiftLeft' && event.code === 'ShiftRight') {
+      if(event.type === 'mousedown' && event.target === document.querySelector(`[data-code-name="${event.code}"]`)) {
+        console.log('shift set')
+      }
+    }
+    
+    // switch(event.code) {
+    //   case 'ShiftLeft': 
+    //   return false;
+    //     break
+    
+    //   case 'ShiftRight':  
+    //   return false;
+    //     break
+        
+    //   case 'Delete': 
+    //   return false;
+    //   break
+
+    //   default:
+    //     return true;
+    //     break
+    // }
+  }
+
+  shiftWatcher(event, state) {
+    if (event.code === 'ShiftLeft' || event.code === 'ShiftRight') {
+      if (state) {
+        if (this.shift != true) {
+          this.shift = true;
+          if(this.alt === true) {
+            if (this.language === 'en') {
+              this.loadSkin('ru')
+            } else {
+              this.loadSkin('en')
+            }
+          }
+          this.render()
+        }
+      } else {
+        this.shift = false;
+        this.render()
+      }
+      return false;
+    }     else {
+      return true
+    }
+  }
+
+  altWatcher(event, state) {
+    if (event.code === 'AltLeft' || event.code === 'AltRight') {
+      if (state) {
+        if (this.alt != true) {
+          this.alt = true;
+          if(this.shift === true) {
+            if (this.language === 'en') {
+              this.loadSkin('ru')
+            } else {
+              this.loadSkin('en')
+            }
+          }
+          this.render()
+        }
+      } else {
+        this.alt = false;
+        this.render()
+      }
+      return false;
+    }    else {
+      return true
+    }
+  }
+
+  
 }

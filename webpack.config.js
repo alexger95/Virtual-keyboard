@@ -66,5 +66,6 @@ module.exports = (env) => ({
     new MiniCssExtractPlugin({ filename: '[name].[contenthash].css' }),
     new CleanWebpackPlugin({ }),
   ],
+  devtool: 'eval',
   ...devServer(env.development)
 });
