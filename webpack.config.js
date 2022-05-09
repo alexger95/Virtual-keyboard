@@ -57,7 +57,7 @@ module.exports = (env) => ({
     ],
   },
   plugins: [
-    new webpack.HotModuleReplacementPlugin(),
+    new webpack.HotModuleReplacementPlugin({ filename: '[name].[contenthash].css' }),
     new HtmlWebpackPlugin({
       title: 'webpack KeyBoard',
       template: path.resolve(__dirname, './src/template.html'), // шаблон
