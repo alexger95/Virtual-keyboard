@@ -9,11 +9,12 @@ let  keyBoard = document.createElement('div');
 keyBoard.classList.add('keyBoard');
 let  keyBoardLang = document.createElement('span');
 keyBoardLang.classList.add('keyBoardLang');
-keyBoardLang.innerText = 'en'
+keyBoardLang.innerText = 'en';
+input.focus();
 ROOT.append(input, keyBoard, keyBoardLang);
 
 let keyBoardInstance = new KeyBoard('en', input, keyBoard, keyBoardLang);
 keyBoardInstance.render();
-alert('Если не сложно, проверьте работу чуть позже, хочу немного доделать. Переключение языка Shift + Alt')
+//alert('Если не сложно, проверьте работу чуть позже, хочу немного доделать. Переключение языка Shift + Alt')
 
 

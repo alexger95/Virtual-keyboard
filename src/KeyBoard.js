@@ -2,25 +2,42 @@ import {getEnglishLayout, getRussianLayout, getKeyCode} from './Language'
 
 export default class KeyBoard {
   constructor(language = 'en', outputArea, keyBoardArea, keyBoardLang) { 
-    this.language = language;
-    this.currentSkin = {};
-    this.loadSkin(this.language);
-    this.keyCode = getKeyCode().default;
+    this.language;
+    this.checkLocalStorageLanguage(language);    
+    this.currentSkin = {};    
     this.shift = false;
-    this.shift = false;
+    this.alt = false;
     this.outputArea = outputArea;
     this.keyBoardArea = keyBoardArea;
     this.keyBoardLang = keyBoardLang;
-    this.cursor = 0;
+    this.functionKey = ['ShiftLeft', 'ControlLeft', 'AltLeft', 'Space', 'Enter', 'Tab', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+    this.loadSkin(this.language);
+    this.keyCode = getKeyCode().default;
+    console.log(this.keyBoardLang)
+  }
+
+  setLocalStorageLanguage(lang) {
+    localStorage.setItem('lang', lang);
+  }
+
+  checkLocalStorageLanguage(lang) {
+    if(localStorage.getItem('lang')) {
+      this.language = localStorage.getItem('lang');
+    } else {
+      this.language = lang
+    }
   }
 
   loadSkin(language) {
     if(language === 'en') {
       this.currentSkin = getEnglishLayout();
+      this.language = 'en'
     } else {
       this.currentSkin = getRussianLayout();
+      this.language = 'ru'
     }
-    this.keyBoardLang.innerHTML = this.keyBoardLang;
+    this.setLocalStorageLanguage(this.language)
+    this.keyBoardLang.innerText = this.language
   }
 
   render() { 
@@ -37,15 +54,10 @@ export default class KeyBoard {
   }
 
   keyDown(event) {
-    console.log('keydown')
     event.preventDefault();
     let keyNode = document.querySelector(`[data-code-name="${event.code}"]`);
     this.keyPressed(keyNode, true);
-    
-    if(this.shiftWatcher(event, true) && this.altWatcher(event, true)) {
-      this.inputSymbol(keyNode.innerHTML);
-    } 
-    
+    this.keyRouter(event);
   }
 
   keyUp(event) {
@@ -59,11 +71,16 @@ export default class KeyBoard {
   keyPressed(keyNode, addStyle) {
     if(addStyle) {
       keyNode.classList.add('pressed');
-      // if (this.filter(event)) {
-      //   this.inputSymbol(event.target.key.innerText);
-      // }
     } else {
       keyNode.classList.remove('pressed');
+    }
+  }
+
+  keyRouter(event) {
+    if(this.functionKey.indexOf(event.code) === -1) {
+      this.inputSymbol(event.key);
+    } else {
+      this.functionButtons(event);
     }
   }
 ////////////////////////////button////////////////////////////////////////////////////////////
@@ -81,14 +98,22 @@ export default class KeyBoard {
 
   buttonPressed(event, addStyle) {
     if(addStyle) {
-      event.target.key.classList.add('pressed');
-      if (this.filter(event)) {
-        this.inputSymbol(event.target.key.innerText);
+      event.target.classList.add('pressed');
+      
+      if(this.functionKey.indexOf(event.target.dataset.codeName) === -1) {
+        this.inputSymbol(event.target.innerText);
+      } else {
+        let eK = {};
+        eK.code = event.target.dataset.codeName;
+        this.functionButtons(eK);
       }
     } else {
-      event.target.key.classList.remove('pressed');
+      
+      event.target.classList.remove('pressed');
     }
   }
+
+  
 /////////////////////////////////////////////////////////////////
   keyFactory(keyUnicode = '?', keysCode, keyIndex) {  
     let keyNode = document.createElement('div');
@@ -130,32 +155,56 @@ export default class KeyBoard {
     inputNode.append(unicode)
   }
 
-
-
-  filter(event) {
-    if(event.code === 'ShiftLeft' && event.code === 'ShiftRight') {
-      if(event.type === 'mousedown' && event.target === document.querySelector(`[data-code-name="${event.code}"]`)) {
-        console.log('shift set')
-      }
-    }
+  functionButtons(event) {    
+    switch(event.code) {
+      case 'ShiftLeft':
+      return this.shiftWatcher(event, true);
+      break;
     
-    // switch(event.code) {
-    //   case 'ShiftLeft': 
-    //   return false;
-    //     break
-    
-    //   case 'ShiftRight':  
-    //   return false;
-    //     break
+      case 'ShiftRight':  
+      return this.shiftWatcher(event, true);
+        break;
         
-    //   case 'Delete': 
-    //   return false;
-    //   break
+      case 'AltLeft': 
+      return this.altWatcher(event, true);
+      break;
 
-    //   default:
-    //     return true;
-    //     break
-    // }
+      case 'ControlLeft': 
+      return this.controlWatcher(event, true);
+      break;
+
+      case 'Space': 
+      return this.spaceWatcher(event, true);
+      break;
+
+      case 'Enter': 
+      return this.enterWatcher(event, true);
+      break;
+
+      case 'Tab': 
+      return this.tabWatcher(event, true);
+      break;
+
+      case 'ArrowUp': 
+      return this.arrowUpWatcher(event, true);
+      break;
+
+      case 'ArrowDown': 
+      return this.arrowDownWatcher(event, true);
+      break;
+
+      case 'ArrowLeft': 
+      return this.arrowLeftWatcher(event, true);
+      break;
+
+      case 'ArrowRight': 
+      return this.arrowRightWatcher(event, true);
+      break;
+
+      default:
+        return true;
+        break;
+    }
   }
 
   shiftWatcher(event, state) {
@@ -206,5 +255,65 @@ export default class KeyBoard {
     }
   }
 
+  spaceWatcher(event) {
+    if (event.code === 'Space') {
+      this.inputSymbol(' ');
+      return false;
+    } else {
+      return true
+    }
+  }
+  
+
+  enterWatcher(event) {
+    if (event.code === 'Enter') {
+      this.inputSymbol('\n');
+      return false;
+    } else {
+      return true
+    }
+  }
+
+  tabWatcher(event) {
+    if (event.code === 'Tab') {
+      this.inputSymbol('    ');
+      return false;
+    } else {
+      return true
+    }
+  }
+
+  arrowUpWatcher(event) {
+    if (event.code === 'ArrowUp') {
+      this.inputSymbol('↑');
+      return false;
+    } else {
+      return true
+    }
+  }
+  arrowDownWatcher(event) {
+    if (event.code === 'ArrowDown') {
+      this.inputSymbol('↓');
+      return false;
+    } else {
+      return true
+    }
+  }
+  arrowLeftWatcher(event) {
+    if (event.code === 'ArrowLeft') {
+      this.inputSymbol('←');
+      return false;
+    } else {
+      return true
+    }
+  }
+  arrowRightWatcher(event) {
+    if (event.code === 'ArrowRight') {
+      this.inputSymbol('→');
+      return false;
+    } else {
+      return true
+    }
+  }
   
 }
