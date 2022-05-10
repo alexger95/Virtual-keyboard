@@ -20,7 +20,7 @@ export default class KeyBoard {
     } else {
       this.currentSkin = getRussianLayout();
     }
-    console.log( this.keyBoardLang )
+    this.keyBoardLang.innerHTML = this.keyBoardLang;
   }
 
   render() { 
