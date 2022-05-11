@@ -1,20 +1,22 @@
 import KeyBoard from './KeyBoard';
-import './style.scss'
+import './style.scss';
 
 const ROOT = document.querySelector('#root');
 
-let input = document.createElement('textarea');
+const input = document.createElement('textarea');
 input.classList.add('input');
-let  keyBoard = document.createElement('div');
+input.autofocus = true;
+const keyBoard = document.createElement('div');
 keyBoard.classList.add('keyBoard');
-let  keyBoardLang = document.createElement('span');
+const keyBoardLang = document.createElement('span');
 keyBoardLang.classList.add('keyBoardLang');
 keyBoardLang.innerText = 'en';
+const description = document.createElement('span');
+description.classList.add('keyBoardLang');
+description.innerText = 'keyboard develop on windows, switch language alt+shift';
 input.focus();
-ROOT.append(input, keyBoard, keyBoardLang);
+ROOT.append(input, keyBoard, keyBoardLang, description);
 
-let keyBoardInstance = new KeyBoard('en', input, keyBoard, keyBoardLang);
+const keyBoardInstance = new KeyBoard('en', input, keyBoard, keyBoardLang);
 keyBoardInstance.render();
-//alert('Если не сложно, проверьте работу чуть позже, хочу немного доделать. Переключение языка Shift + Alt')
-
-
+alert('Мой pull requests https://github.com/alexger95/virtual-keyboard/pull/1');

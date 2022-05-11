@@ -2,6 +2,7 @@ const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const ESLintPlugin = require('eslint-webpack-plugin');
 const webpack = require('webpack')
 
 const devServer = (isDev) => !isDev ? {} : {
@@ -57,6 +58,7 @@ module.exports = (env) => ({
     ],
   },
   plugins: [
+    new ESLintPlugin(),
     new webpack.HotModuleReplacementPlugin({ filename: '[name].[contenthash].css' }),
     new HtmlWebpackPlugin({
       title: 'webpack KeyBoard',

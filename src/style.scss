@@ -15,15 +15,26 @@ body {
   min-width: 15px;
   text-align: center;
   flex-grow: 1;
+  transition: all 0.3s;
+  &:hover {
+    background: rgb(79, 85, 85);
+    border: 1px solid rgb(86, 92, 92);
+  }
+ 
 }
 
 .pressed {
-  background: red;
+  background: rgb(57, 126, 120);
+  &:hover {
+    background: rgb(57, 126, 120);
+    border: 1px solid rgb(57, 126, 120);
+  }
 }
 
 .input {
   width: 80vw;
   height: 30vh;
+  border-radius: 10px;
 }
 
 .keyBoard {
@@ -42,4 +53,5 @@ body {
 
 .keyBoardLang {
   font-size: 32px;
+  margin: 20px;
 }
