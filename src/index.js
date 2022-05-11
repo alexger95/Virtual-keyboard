@@ -1,7 +1,7 @@
 import KeyBoard from './KeyBoard';
 import './style.scss';
 
-const ROOT = document.querySelector('#root');
+const ROOT = document.querySelector('body');
 
 const input = document.createElement('textarea');
 input.classList.add('input');
